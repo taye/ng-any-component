@@ -6,9 +6,11 @@ import {
   Input,
   SimpleChange,
   ViewChild,
+  ContentChildren,
   ViewContainerRef,
 } from '@angular/core';
- 
+
+import { AnyContentDirective } from './any-content.directive';
 
 @Component({
   selector: 'any-component',
@@ -24,6 +26,7 @@ export class AnyComponent {
   @Input() props: any = null;
 
   @ViewChild('template', {read: ViewContainerRef}) templateViewContainer: ViewContainerRef;
+  @ContentChildren(AnyContentDirective) content;
 
   factory: ComponentFactory<any> = null;
   component: ComponentRef<any> = null;
@@ -32,6 +35,14 @@ export class AnyComponent {
   private changedProps: { [index:string]: boolean } = {};
 
   constructor(private resolver: ComponentFactoryResolver) {}
+
+  ngAfterContentInit() {
+    console.log('contents:', this.content && this.content._results);
+
+    this.content.changes.subscribe(changes => {
+      console.log('content changes:', changes);
+    });
+  }
 
   ngOnChanges(changes) {
     if (changes.props) {
