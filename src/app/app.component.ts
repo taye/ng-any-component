@@ -12,18 +12,20 @@ import {
 @Component({
   selector: 'app-root',
   template: `
-  <div (click)="increaseWidth()">
+  <div>
     <h3>
       Bellow is an &lt;any-component [is]={{ wrapper.name }}/&gt;
     </h3>
 
     <any-component  [is]="wrapper" [props]="wrapperProps">
+      <any-content>
       This content is inside an &lt;any-component/&gt; which creates another
       component with dynamic poperties
 
-      <button type="button">
+      <button type="button" (click)="increaseWidth()">
         Click to increasee the border width
       </button>
+      </any-content>
     </any-component>
 
     <br>
@@ -33,7 +35,7 @@ import {
     </border-component>
   </div>
   `,
-  styles: []
+  styles: [`border-component { padding: 10px; margin: 10px; }`]
 })
 export class AppComponent {
   wrapper = BorderComponent;

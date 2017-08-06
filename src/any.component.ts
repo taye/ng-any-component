@@ -7,7 +7,10 @@ import {
   SimpleChange,
   ViewChild,
   ContentChildren,
+  ElementRef,
   ViewContainerRef,
+  Renderer,
+  Type,
 } from '@angular/core';
 
 import { AnyContentDirective } from './any-content.directive';
@@ -22,11 +25,11 @@ import { AnyContentDirective } from './any-content.directive';
   styles: []
 })
 export class AnyComponent {
-  @Input() is: Function = null;
+  @Input() is: Type<any>;
   @Input() props: any = null;
 
   @ViewChild('template', {read: ViewContainerRef}) templateViewContainer: ViewContainerRef;
-  @ContentChildren(AnyContentDirective) content;
+  @ContentChildren(AnyContentDirective, {read: ElementRef}) content;
 
   factory: ComponentFactory<any> = null;
   component: ComponentRef<any> = null;
@@ -34,7 +37,11 @@ export class AnyComponent {
   private propVals: any = {};
   private changedProps: { [index:string]: boolean } = {};
 
-  constructor(private resolver: ComponentFactoryResolver) {}
+  constructor(
+    private resolver: ComponentFactoryResolver,
+    private viewContainer: ViewContainerRef,
+  ) {
+  }
 
   ngAfterContentInit() {
     console.log('contents:', this.content && this.content._results);
@@ -42,6 +49,9 @@ export class AnyComponent {
     this.content.changes.subscribe(changes => {
       console.log('content changes:', changes);
     });
+
+    this.destroyComponent();
+    this.createComponent();
   }
 
   ngOnChanges(changes) {
@@ -60,14 +70,20 @@ export class AnyComponent {
   }
 
   createComponent() {
-    if (!this.is) {
+    if (!this.is || !this.content) {
       return;
     }
 
-    this.factory = this.resolver.resolveComponentFactory(this.is as any);
-    this.component = this.templateViewContainer.createComponent(this.factory);
-
-    // for (prop
+    this.factory = this.resolver.resolveComponentFactory(this.is);
+    this.component = this.templateViewContainer.createComponent(
+      this.factory,
+      undefined,
+      undefined,
+      this.content
+        .filter(ref => ref != this.viewContainer.element)
+        .map(ref => Array.from(ref.nativeElement.childNodes))
+      ,
+    );
 
     this.changedProps = {};
 
@@ -76,7 +92,7 @@ export class AnyComponent {
 
     for (const prop in this.props) {
       // this.component.instance[prop] = this.props[prop];
-		  // this.component.changeDetectorRef.detectChanges();
+      // this.component.changeDetectorRef.detectChanges();
     }
   }
 
