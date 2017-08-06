@@ -36,6 +36,7 @@ export class AnyComponent {
 
   private propVals: any = {};
   private changedProps: { [index:string]: boolean } = {};
+  private projectedNodes: any[][];
 
   constructor(
     private resolver: ComponentFactoryResolver,
@@ -46,11 +47,10 @@ export class AnyComponent {
   ngAfterContentInit() {
     console.log('contents:', this.content && this.content._results);
 
-    this.content.changes.subscribe(changes => {
-      console.log('content changes:', changes);
-    });
+    this.projectedNodes = this.projectedNodes || this.content
+      .filter(ref => ref != this.viewContainer.element)
+      .map(ref => Array.from(ref.nativeElement.childNodes))
 
-    this.destroyComponent();
     this.createComponent();
   }
 
@@ -64,12 +64,13 @@ export class AnyComponent {
     }
 
     if (changes.is) {
-      this.destroyComponent();
       this.createComponent();
     }
   }
 
   createComponent() {
+    this.destroyComponent();
+
     if (!this.is || !this.content) {
       return;
     }
@@ -79,10 +80,7 @@ export class AnyComponent {
       this.factory,
       undefined,
       undefined,
-      this.content
-        .filter(ref => ref != this.viewContainer.element)
-        .map(ref => Array.from(ref.nativeElement.childNodes))
-      ,
+      this.projectedNodes,
     );
 
     this.changedProps = {};
