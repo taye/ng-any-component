@@ -8,3 +8,7 @@ body {
 * {
   border-color: white;
 }
+
+border-component, background-component {
+  margin: 10px auto;
+}

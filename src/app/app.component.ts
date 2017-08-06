@@ -15,7 +15,7 @@ import {
   template: `
   <div>
     <h3>
-      Bellow is an &lt;any-component [is]={{ wrapper.name }}/&gt;
+      Bellow is an &lt;any-component/&gt; with dynamic projected content
     </h3>
 
     <any-component  [is]="wrapper" [props]="wrapperProps">
@@ -24,8 +24,13 @@ import {
       component with dynamic poperties
 
       <button type="button" (click)="increaseWidth()">
-        Click to increasee the border width
+        Click to increase the border width ({{ wrapperProps.width }}px)
       </button>
+
+      <border-component [width]="wrapperProps.width">
+        Content inside a regular border-component which is projected in the any-component
+      </border-component>
+
       </any-content>
     </any-component>
 
@@ -36,10 +41,6 @@ import {
     </button>
 
     <br>
-
-    <border-component>
-      Content inside a regular border-component
-    </border-component>
   </div>
   `,
   styles: [`border-component { padding: 10px; margin: 10px; }`]
