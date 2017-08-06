@@ -7,6 +7,7 @@ import {
   SimpleChange,
   ViewChild,
   ViewContainerRef,
+  Type,
 } from '@angular/core';
 
 @Component({
@@ -30,6 +31,12 @@ import {
 
     <br>
 
+    <button type="button" (click)="changeType()">
+      Click to switch container type
+    </button>
+
+    <br>
+
     <border-component>
       Content inside a regular border-component
     </border-component>
@@ -38,7 +45,7 @@ import {
   styles: [`border-component { padding: 10px; margin: 10px; }`]
 })
 export class AppComponent {
-  wrapper = BorderComponent;
+  wrapper: Type<any> = BorderComponent;
   wrapperProps = {
     width: 10,
     color: 'green',
@@ -47,6 +54,15 @@ export class AppComponent {
   increaseWidth() {
     this.wrapperProps.width += 10;
     console.log(`props: ${JSON.stringify(this.wrapperProps)}`);
+  }
+
+  changeType() {
+    if (this.wrapper === BorderComponent) {
+      this.wrapper = BackgroundComponent;
+    }
+    else {
+      this.wrapper = BorderComponent;
+    }
   }
 }
 
@@ -61,4 +77,17 @@ export class AppComponent {
 })
 export class BorderComponent {
   @Input() width = 1;
+}
+
+@Component({
+  selector: 'bacground-component',
+  template: `
+    <div style="padding: 10px" [ngStyle]="{ backgroundColor: (color || '') }">
+      <ng-content></ng-content>
+    </div>
+  `,
+  styles: []
+})
+export class BackgroundComponent {
+  @Input() color = '#29e';
 }
