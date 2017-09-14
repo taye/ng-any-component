@@ -6,9 +6,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "echo \"Error: no test... minimal project\" && exit 1",
-    "lint": "echo \"Error: no lint... minimal project\" && exit 1",
-    "e2e": "echo \"Error: no e2e... minimal project\" && exit 1"
+    "test": "ng test"
   },
   "private": true,
   "dependencies": {
@@ -29,6 +27,13 @@
     "@angular/cli": "1.2.1",
     "@angular/compiler-cli": "^4.0.0",
     "@angular/language-service": "^4.0.0",
+    "@types/jasmine": "^2.5.54",
+    "jasmine-core": "^2.8.0",
+    "karma": "^1.7.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage-istanbul-reporter": "^1.3.0",
+    "karma-jasmine": "^1.1.0",
+    "karma-jasmine-html-reporter": "^0.2.2",
     "typescript": "~2.3.3"
   }
 }
