@@ -18,13 +18,19 @@ import {
       Bellow is an &lt;any-component/&gt; with dynamic projected content
     </h3>
 
-    <any-component  [is]="wrapper" [props]="wrapperProps">
+    <button type="button" (click)="changeType()">
+      Click to switch container type ({{ wrappers[wrapperIndex] ? wrappers[wrapperIndex].name : 'none' }})
+    </button>
+
+    <any-component [is]="wrappers[wrapperIndex]" [props]="wrapperProps">
       <any-content>
       This content is inside an &lt;any-component/&gt; which creates another
       component with dynamic poperties
 
-      <button type="button" (click)="increaseWidth()">
-        Click to increase the border width ({{ wrapperProps.width }}px)
+      Border width is currently set to {{ wrapperProps.width }}. Change it to: <br/>
+
+      <button *ngFor="let width of [10, 20, 30]" (click)="setWidth(width)" type="button">
+        {{ width }}px
       </button>
 
       <border-component [width]="wrapperProps.width">
@@ -36,34 +42,26 @@ import {
 
     <br>
 
-    <button type="button" (click)="changeType()">
-      Click to switch container type
-    </button>
-
     <br>
   </div>
   `,
   styles: [`border-component { padding: 10px; margin: 10px; }`]
 })
 export class AppComponent {
-  wrapper: Type<any> = BorderComponent;
+  wrappers: Type<any>[] = [BorderComponent, BackgroundComponent, null];
+  wrapperIndex = 0;
   wrapperProps = {
     width: 10,
     color: 'green',
   };
 
-  increaseWidth() {
-    this.wrapperProps.width += 10;
+  setWidth(width) {
+    this.wrapperProps.width = parseInt(width);
     console.log(`props: ${JSON.stringify(this.wrapperProps)}`);
   }
 
   changeType() {
-    if (this.wrapper === BorderComponent) {
-      this.wrapper = BackgroundComponent;
-    }
-    else {
-      this.wrapper = BorderComponent;
-    }
+    this.wrapperIndex = (this.wrapperIndex + 1) % this.wrappers.length;
   }
 }
 
