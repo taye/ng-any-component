@@ -21,6 +21,7 @@ import { AnyContentDirective } from './any-content.directive';
     <ng-template #template>
       <ng-content></ng-content>
     </ng-template>
+    <ng-container #container></ng-container>
   `,
   styles: []
 })
@@ -29,6 +30,7 @@ export class AnyComponent {
   @Input() props: any = null;
 
   @ViewChild('template', {read: ViewContainerRef}) templateViewContainer: ViewContainerRef;
+  @ViewChild('container', {read: ElementRef}) containerRef: ElementRef;
   @ContentChildren(AnyContentDirective, {read: ElementRef}) content;
 
   factory: ComponentFactory<any> = null;
@@ -45,8 +47,6 @@ export class AnyComponent {
   }
 
   ngAfterContentInit() {
-    console.log('contents:', this.content && this.content._results);
-
     this.projectedNodes = this.projectedNodes || this.content
       .filter(ref => ref != this.viewContainer.element)
       .map(ref => Array.from(ref.nativeElement.childNodes))
@@ -72,8 +72,20 @@ export class AnyComponent {
     this.destroyComponent();
 
     if (!this.is || !this.content) {
+      if (this.content) {
+        // comment element representing the <ng-container/>
+        const containerNode = this.containerRef.nativeElement;
+        let nextSibling = containerNode.nextSibling;
+
+        this.projectedNodes.forEach(nodeList => nodeList.forEach(node => {
+          containerNode.parentNode.insertBefore(node, nextSibling);
+          nextSibling = node.nextSibling;;
+        }));
+      }
       return;
     }
+
+    this.projectedNodes.forEach(nodeList => nodeList.forEach(node => node.remove()));
 
     this.factory = this.resolver.resolveComponentFactory(this.is);
     this.component = this.templateViewContainer.createComponent(
