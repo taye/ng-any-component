@@ -1,4 +1,6 @@
 import {
+  ApplicationRef,
+  ChangeDetectorRef,
   Component,
   ComponentFactory,
   ComponentFactoryResolver,
@@ -26,8 +28,19 @@ import { AnyContentDirective } from './any-content.directive';
   styles: []
 })
 export class AnyComponent {
+  private _props: any = null;
+  get props() { return this._props; };
+  @Input() set props(value) {
+    this.unsetProps(this.props, value);
+
+    if (this.component) {
+      this.setUpProps(value);
+    }
+
+    this._props = value;
+  };
+
   @Input() is: Type<any>;
-  @Input() props: any = null;
 
   @ViewChild('template', {read: ViewContainerRef}) templateViewContainer: ViewContainerRef;
   @ViewChild('container', {read: ElementRef}) containerRef: ElementRef;
@@ -43,6 +56,8 @@ export class AnyComponent {
   constructor(
     private resolver: ComponentFactoryResolver,
     private viewContainer: ViewContainerRef,
+    private changeDetectorRef: ChangeDetectorRef,
+    private appRef: ApplicationRef,
   ) {
   }
 
@@ -55,14 +70,6 @@ export class AnyComponent {
   }
 
   ngOnChanges(changes) {
-    if (changes.props) {
-      this.unsetProps(changes.props.previousValue);
-
-      if (this.component) {
-        this.setUpProps(changes.props.currentValue);
-      }
-    }
-
     if (changes.is) {
       this.createComponent();
     }
@@ -102,8 +109,9 @@ export class AnyComponent {
 
     for (const prop in this.props) {
       // this.component.instance[prop] = this.props[prop];
-      // this.component.changeDetectorRef.detectChanges();
     }
+
+    this.component.changeDetectorRef.detectChanges();
   }
 
   destroyComponent() {
@@ -111,7 +119,7 @@ export class AnyComponent {
     this.component = null;
   }
 
-  changeInstanceProp(prop, newValue) {
+  changeInstanceProp(prop, newValue, changes = {}) {
     if (!this.component) {
       return;
     }
@@ -127,16 +135,18 @@ export class AnyComponent {
     this.changedProps[prop] = true;
 
     if (instance.ngOnChanges) {
-      instance.ngOnChanges({
-        [prop]: new SimpleChange(oldValue, newValue, !!this.changedProps[prop]),
-      });
+      changes[prop] = new SimpleChange(oldValue, newValue, !!this.changedProps[prop]);
     }
+
+    return changes;
   }
 
   setUpProps(props: any) {
     if (!props) {
       return;
     }
+
+    const changes = {};
 
     Object.defineProperties(props, Object.keys(props).reduce((defs: any, prop) => {
       defs[prop] = {
@@ -153,16 +163,22 @@ export class AnyComponent {
       const initialValue = props[prop];
 
       this.propVals[prop] = initialValue;
-      // this.changeInstanceProp(prop, initialValue);
+      this.changeInstanceProp(prop, initialValue, changes)
 
       return defs;
     }, {}));
+
+    if (Object.keys(changes).length > 0) {
+      this.component.instance.ngOnChanges(changes);
+    }
   }
 
-  unsetProps(oldProps: any) {
+  unsetProps(oldProps: any, replacement?) {
     if (!oldProps) {
       return;
     }
+
+    const changes = {};
 
     Object.defineProperties(oldProps, Object.keys(oldProps).reduce((defs: any, prop) => {
       defs[prop] = {
@@ -172,7 +188,15 @@ export class AnyComponent {
         writable: true,
       };
 
+      if (!(replacement && prop in replacement)) {
+        this.changeInstanceProp(prop, undefined, changes)
+      }
+
       return defs;
     }, {}));
+
+    if (Object.keys(changes).length > 0) {
+      this.component.instance.ngOnChanges(changes);
+    }
   }
 }

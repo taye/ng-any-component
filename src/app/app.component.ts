@@ -76,6 +76,10 @@ export class AppComponent {
 })
 export class BorderComponent {
   @Input() width = 1;
+
+  ngOnChanges(changes) {
+    console.log('border change', this.width);
+  }
 }
 
 @Component({

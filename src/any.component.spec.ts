@@ -132,11 +132,11 @@ describe('AnyComponent', () => {
     instance.props = { prop1, prop2 };
     fixture.detectChanges();
 
-    expect(targetInstance.changes.length).toBe(2);
+    expect(targetInstance.changes.length).toBe(1);
     expect(targetInstance.changes[0].prop1.previousValue).toBe(undefined);
     expect(targetInstance.changes[0].prop1.currentValue).toBe(prop1);
-    expect(targetInstance.changes[1].prop2.previousValue).toBe(undefined);
-    expect(targetInstance.changes[1].prop2.currentValue).toBe(prop2);
+    expect(targetInstance.changes[0].prop2.previousValue).toBe(undefined);
+    expect(targetInstance.changes[0].prop2.currentValue).toBe(prop2);
 
     fixture.detectChanges();
   });
