@@ -3,6 +3,9 @@
 A pair of directives for creating other components dynamically with projected
 content and changing inputs.
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/f8d60c47db39fe38cbc9/maintainability)](https://codeclimate.com/github/taye/ng-any-component/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/f8d60c47db39fe38cbc9/test_coverage)](https://codeclimate.com/github/taye/ng-any-component/test_coverage)
+
 ```html
 <!-- parent.component.html -->
 <any-component
